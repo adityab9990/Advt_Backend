@@ -2,6 +2,7 @@ package com.project.advtRecords.entity;
 
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,6 +29,8 @@ public class Advertisement {
     @Column(unique = true, nullable = false)
     private String advtNo;
 
+	@Column(name = "is_paid")
+	private Boolean isPaid = false; // Defaults to false (Pending) when a new ad is created
 
 
     private String advtName;
@@ -40,9 +43,9 @@ public class Advertisement {
     private Double billRupees;
     private String pdfPath;
     private LocalDate publishingDate;
-    private Boolean isPaid = false; // Add this field
+ 
 
     public enum Category { PCMC, GOV }
 
 
-	}
+}
