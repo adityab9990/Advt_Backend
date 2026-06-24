@@ -22,6 +22,7 @@ import com.project.advtRecords.service.AdvertisementService;
 @RestController
 @RequestMapping("/api/advertisements")
 
+
 public class AdvertisementController {
 
     // Inject the SERVICE, not the Repository
@@ -34,14 +35,9 @@ public class AdvertisementController {
             @RequestParam(required = false) String advtName) {
         // Call the service
         return advertisementService.searchAdvertisements(advtNo, advtName);
+
     }
 
-    @PutMapping("/{id}")
-    public Advertisement updateAd(@PathVariable Long id, @RequestBody Advertisement updatedAd) {
-        // Call the service
-        return advertisementService.updateAdvertisement(id, updatedAd);
-    }
-    
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadAdvertisement(
             @RequestParam("file") MultipartFile file,
@@ -53,7 +49,7 @@ public class AdvertisementController {
             @RequestParam("billRupees") Double billRupees,
             @RequestParam("publishingDate") String publishingDate) {
 
-        // 1. Create the entity
+        // Create the entity
         Advertisement ad = new Advertisement();
         ad.setAdvtNo(advtNo);
         ad.setAdvtName(advtName);
@@ -61,13 +57,20 @@ public class AdvertisementController {
         ad.setCategory(Advertisement.Category.valueOf(category));
         ad.setSize(size);
         ad.setBillRupees(billRupees);
-        ad.setPublishingDate(LocalDate.parse(publishingDate)); // Ensure you use LocalDate
+        ad.setPublishingDate(LocalDate.parse(publishingDate));
 
-        // 2. Pass to service
+        // Call the service (ensure this matches the method signature we just updated)
         advertisementService.saveAdvertisement(ad, file);
         
         return ResponseEntity.ok("Advertisement added successfully!");
     }
+
+    @PutMapping("/{id}")
+    public Advertisement updateAd(@PathVariable Long id, @RequestBody Advertisement updatedAd) {
+        // Call the service
+        return advertisementService.updateAdvertisement(id, updatedAd);
+    }
+
+  
     
- 
 }
