@@ -1,55 +1,73 @@
 package com.project.advtRecords.service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.project.advtRecords.entity.Advertisement;
 import com.project.advtRecords.repository.AdvtRepository;
 
-import jakarta.persistence.criteria.Predicate;
-
+// @Service tells Spring Boot "This is where the business logic lives"
 @Service
 public class AdvertisementService {
 
     @Autowired
-    private AdvtRepository repository;
+    private AdvtRepository advertisementRepository;
 
     @Autowired
-    private FileStorageService fileStorageService; // Inject your file storage logic
+    private FileStorageService fileService;
 
-    // Handles both metadata and file saving
-    public void save(Advertisement advt, MultipartFile file) {
+    // 1. Search Method
+    public List<Advertisement> searchAdvertisements(String advtNo, String advtName) {
+        return advertisementRepository.searchAdvertisements(advtNo, advtName);
+    }
+
+   
+    // 2. Save / Add Method
+    public void saveAdvertisement(Advertisement ad, MultipartFile file) {
+        // Only attempt to save a file if it's provided
         if (file != null && !file.isEmpty()) {
-            String path = fileStorageService.saveFile(file);
-            advt.setPdfPath(path);
+            String filename = fileService.saveFile(file);
+            ad.setPdfPath(filename); // Store filename in DB
         }
-        repository.save(advt);
+        advertisementRepository.save(ad);
     }
 
-    public List<Advertisement> searchAdvertisements(String advtNo, String department, String category) {
-        return repository.findAll((Specification<Advertisement>) (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+    // 3. Update Method (Used for your Editing and Paid/Pending button)
+    public Advertisement updateAdvertisement(Long id, Advertisement updatedData) {
+        Optional<Advertisement> existingAd = advertisementRepository.findById(id);
+        
+        if (existingAd.isPresent()) {
+            Advertisement ad = existingAd.get();
+            // Update the fields
+            ad.setAdvtNo(updatedData.getAdvtNo());
+            ad.setAdvtName(updatedData.getAdvtName());
+            ad.setDepartment(updatedData.getDepartment());
+            ad.setCategory(updatedData.getCategory());
+            ad.setSize(updatedData.getSize());
+            ad.setBillRupees(updatedData.getBillRupees());
+            ad.setPublishingDate(updatedData.getPublishingDate());
             
-            if (advtNo != null && !advtNo.isEmpty()) 
-                predicates.add(cb.like(root.get("advtNo"), "%" + advtNo + "%"));
+            // Update the payment status!
+            ad.setIsPaid(updatedData.getIsPaid()); 
             
-            if (department != null && !department.isEmpty()) 
-                predicates.add(cb.equal(root.get("department"), department));
-            
-            if (category != null && !category.isEmpty()) 
-                predicates.add(cb.equal(root.get("category"), Advertisement.Category.valueOf(category)));
-            
-            return cb.and(predicates.toArray(new Predicate[0]));
-        });
+            return advertisementRepository.save(ad);
+        } else {
+            throw new RuntimeException("Advertisement not found with id: " + id);
+        }
     }
-
-	public void save(Advertisement advt) {
-		// TODO Auto-generated method stub
-		
-	}
+    
+ // Inside AdvertisementService.java
+    public Advertisement updateAdvertisement1(Long id, Advertisement updatedDetails) {
+        Advertisement ad = advertisementRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+        
+        // Update the field
+        ad.setIsPaid(updatedDetails.getIsPaid());
+        
+        return advertisementRepository.save(ad);
+    }
 }

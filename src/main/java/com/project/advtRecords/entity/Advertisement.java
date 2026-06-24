@@ -2,7 +2,6 @@ package com.project.advtRecords.entity;
 
 
 import java.time.LocalDate;
-import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +12,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Data
 @Table(name = "advertisements")
@@ -25,6 +28,8 @@ public class Advertisement {
     @Column(unique = true, nullable = false)
     private String advtNo;
 
+
+
     private String advtName;
     private String department;
     
@@ -35,16 +40,9 @@ public class Advertisement {
     private Double billRupees;
     private String pdfPath;
     private LocalDate publishingDate;
+    private Boolean isPaid = false; // Add this field
 
     public enum Category { PCMC, GOV }
 
-	public void save(Advertisement advt) {
-		// TODO Auto-generated method stub
-		
-	}
 
-	public List<Advertisement> searchAdvertisements(String advtNo2, String department2, String category2) {
-		// TODO Auto-generated method stub
-		return null;
-	}	
-}
+	}

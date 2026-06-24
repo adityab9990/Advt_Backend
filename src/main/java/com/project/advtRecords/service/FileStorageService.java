@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -11,29 +12,36 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileStorageService {
-    // Define the upload path
+    
     private final Path root = Paths.get("uploads");
 
     public FileStorageService() {
         try {
-            Files.createDirectories(root);
+            // Ensure the directory exists
+            if (!Files.exists(root)) {
+                Files.createDirectories(root);
+            }
         } catch (IOException e) {
-            throw new RuntimeException("Could not initialize folder for upload!");
+            throw new RuntimeException("Could not initialize folder for upload!", e);
         }
     }
 
     public String saveFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("Cannot save an empty file.");
+        }
+        
         try {
-            // Generate a unique filename
-            String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            // Generate a unique filename using UUID
+            String originalName = file.getOriginalFilename();
+            String filename = UUID.randomUUID().toString() + "_" + (originalName != null ? originalName : "file");
             
-            // Save the file to the 'uploads' folder
-            Files.copy(file.getInputStream(), this.root.resolve(filename));
+            // Resolve the path and copy the file
+            Files.copy(file.getInputStream(), this.root.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
             
-            // RETURN ONLY THE FILENAME (e.g., "550e8400-e29b-41d4-a716-446655440000_doc.pdf")
             return filename; 
-        } catch (Exception e) {
-            throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException("Could not store the file. Error: " + e.getMessage(), e);
         }
     }
 }
