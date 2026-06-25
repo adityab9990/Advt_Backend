@@ -12,7 +12,7 @@ import com.project.advtRecords.dto.LoginRequest; // Corrected import!
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000") 
+@CrossOrigin(origins = "https://advt-frontend.vercel.app")
 public class AuthController {
 
     @PostMapping("/login")
