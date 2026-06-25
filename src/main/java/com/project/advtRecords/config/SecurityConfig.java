@@ -17,32 +17,24 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-	    http
-	        // Enable CORS
-	        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-	        // CRITICAL: Disable CSRF to allow POST requests from React
-	        .csrf(csrf -> csrf.disable()) 
-	        .authorizeHttpRequests(auth -> auth
-	            .requestMatchers("/api/auth/**", "/api/advertisements/**", "/files/**").permitAll()
-	            .anyRequest().authenticated()
-	        );
-	    return http.build();
-	}
-
-	  @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Exactly your Vercel URL
-        configuration.setAllowedOrigins(Arrays.asList("https://advt-frontend.vercel.app"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(cors -> cors.configurationSource(request -> {
+            var corsConfig = new org.springframework.web.cors.CorsConfiguration();
+            // Ensure this matches your exact Vercel URL
+            corsConfig.setAllowedOrigins(java.util.List.of("https://advt-frontend.vercel.app"));
+            corsConfig.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            corsConfig.setAllowedHeaders(java.util.List.of("*"));
+            corsConfig.setAllowCredentials(true);
+            return corsConfig;
+        }))
+        .csrf(csrf -> csrf.disable()) // Crucial for API-only apps
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight
+            .anyRequest().permitAll()
+        );
+    
+    return http.build();
+}
 }
