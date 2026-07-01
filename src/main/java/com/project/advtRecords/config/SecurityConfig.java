@@ -17,7 +17,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(request -> {
                 var corsConfig = new org.springframework.web.cors.CorsConfiguration();
                 // Ensure this matches your exact Vercel URL
-                corsConfig.setAllowedOrigins(java.util.List.of("https://advt-frontend.vercel.app"));
+                corsConfig.setAllowedOrigins(java.util.List.of("http://localhost:3000","https://advt-frontend.vercel.app"));
                 corsConfig.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 corsConfig.setAllowedHeaders(java.util.List.of("*"));
                 corsConfig.setAllowCredentials(true);
